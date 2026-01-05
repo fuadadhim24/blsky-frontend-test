@@ -32,11 +32,10 @@ function loadMessages(): Message[] {
 function saveMessages(messages: Message[]) {
     if (typeof window === "undefined") return;
     try {
-        // Keep only the last MAX_MESSAGES
         const toSave = messages.slice(-MAX_MESSAGES);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch {
-        // Ignore storage errors
+        console.error("Failed to save messages to localStorage");
     }
 }
 
@@ -46,11 +45,9 @@ export function useSocket({ side, onFlash }: UseSocketOptions): UseSocketReturn 
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
-        // Load messages from localStorage on mount
         const savedMessages = loadMessages();
         setMessages(savedMessages);
 
-        // Connect to WebSocket server
         const socket = io({
             path: "/api/socket",
             addTrailingSlash: false,
@@ -73,7 +70,6 @@ export function useSocket({ side, onFlash }: UseSocketOptions): UseSocketReturn 
                 return newMessages;
             });
 
-            // Flash if message is from the other side
             if (message.sender !== side) {
                 onFlash();
             }
